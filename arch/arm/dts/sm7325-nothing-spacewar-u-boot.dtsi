@@ -1,27 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
-/delete-node/ &vreg_s2b_0p7;
-
-&{/soc@0/rsc@18200000/regulators-0} {
-	/delete-property/ vdd-l3-supply;
-	/delete-property/ vdd-l5-supply;
-};
-
-&{/gpio-keys/key-volume-up} {
-	linux,code = <KEY_UP>;
-};
-
-&{/pmic-glink} {
-	/delete-property/ orientation-gpios;
-};
-
 &framebuffer0 {
-	/delete-property/ clocks;
 	/delete-property/ power-domains;
-};
-
-&pm8350c_flash {
-	status = "disabled";
 };
 
 /* This is usually OTG but U-Boot doesn't support that properly */
