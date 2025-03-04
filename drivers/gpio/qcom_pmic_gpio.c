@@ -144,10 +144,10 @@ static int qcom_gpio_set_direction(struct udevice *dev, unsigned int offset,
 	_qcom_gpio_set_direction(dev, offset, input, value);
 
 	/* Set the right pull (no pull) */
-	ret = pmic_reg_write(plat->pmic, gpio_base + REG_DIG_PULL_CTL,
-			     REG_DIG_PULL_NO_PU);
-	if (ret < 0)
-		return ret;
+	// ret = pmic_reg_write(plat->pmic, gpio_base + REG_DIG_PULL_CTL,
+	// 		     REG_DIG_PULL_NO_PU);
+	// if (ret < 0)
+	// 	return ret;
 
 	/* Configure output pin drivers if needed */
 	if (!input) {
