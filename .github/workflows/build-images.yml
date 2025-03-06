@@ -12,6 +12,7 @@ jobs:
           - device: sm7150-xiaomi-davinci
           - device: sm7150-xiaomi-surya-huaxing
           - device: sm7150-xiaomi-surya-tianma
+          - device: sm7325-nothing-spacewar
           - device: sm7325-xiaomi-lisa
 
     name: Build ${{ matrix.device }}
