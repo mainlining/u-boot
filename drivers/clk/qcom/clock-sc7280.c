@@ -16,10 +16,21 @@
 
 #include "clock-qcom.h"
 
+#define UFS_PHY_AXI_CLK_CMD_RCGR 0x77024
+
 #define USB30_PRIM_MASTER_CLK_CMD_RCGR 0xf020
 #define USB30_PRIM_MOCK_UTMI_CLK_CMD_RCGR 0xf038
 #define USB30_SEC_MASTER_CLK_CMD_RCGR 0x9e020
 #define USB30_SEC_MOCK_UTMI_CLK_CMD_RCGR 0x9e038
+
+
+static const struct freq_tbl ftbl_gcc_ufs_phy_axi_clk_src[] = {
+	F(25000000, CFG_CLK_SRC_GPLL0_EVEN, 12, 0, 0),
+	F(75000000, CFG_CLK_SRC_GPLL0_EVEN, 4, 0, 0),
+	F(150000000, CFG_CLK_SRC_GPLL0_EVEN, 2, 0, 0),
+	F(300000000, CFG_CLK_SRC_GPLL0_EVEN, 1, 0, 0),
+	{ }
+};
 
 static const struct freq_tbl ftbl_gcc_usb30_prim_master_clk_src[] = {
 	F(66666667, CFG_CLK_SRC_GPLL0_EVEN, 4.5, 0, 0),
@@ -44,6 +55,11 @@ static ulong sc7280_set_rate(struct clk *clk, ulong rate)
 		debug("%s: %s, requested rate=%ld\n", __func__, priv->data->clks[clk->id].name, rate);
 
 	switch (clk->id) {
+	case GCC_UFS_PHY_AXI_CLK:
+		freq = qcom_find_freq(ftbl_gcc_ufs_phy_axi_clk_src, rate);
+		clk_rcg_set_rate_mnd(priv->base, UFS_PHY_AXI_CLK_CMD_RCGR,
+				     freq->pre_div, freq->m, freq->n, freq->src, 8);
+		return freq->freq;
 	case GCC_USB30_PRIM_MASTER_CLK:
 		freq = qcom_find_freq(ftbl_gcc_usb30_prim_master_clk_src, rate);
 		clk_rcg_set_rate_mnd(priv->base, USB30_PRIM_MASTER_CLK_CMD_RCGR,
@@ -72,6 +88,8 @@ static ulong sc7280_set_rate(struct clk *clk, ulong rate)
 }
 
 static const struct gate_clk sc7280_clks[] = {
+	GATE_CLK(GCC_UFS_PHY_AXI_CLK, 0x77010, 1),
+	GATE_CLK(GCC_UFS_PHY_AHB_CLK, 0x77018, 1),
 	GATE_CLK(GCC_CFG_NOC_USB3_PRIM_AXI_CLK, 0xf07c, 1),
 	GATE_CLK(GCC_USB30_PRIM_MASTER_CLK, 0xf010, 1),
 	GATE_CLK(GCC_AGGRE_USB3_PRIM_AXI_CLK, 0xf080, 1),
@@ -98,6 +116,10 @@ static int sc7280_enable(struct clk *clk)
 	debug("%s: clk %ld: %s\n", __func__, clk->id, sc7280_clks[clk->id].name);
 
 	switch (clk->id) {
+	case GCC_UFS_PHY_AXI_CLK:
+		qcom_gate_clk_en(priv, GCC_UFS_PHY_AHB_CLK);
+		qcom_gate_clk_en(priv, GCC_UFS_PHY_AXI_CLK);
+		break;
 	case GCC_AGGRE_USB3_PRIM_AXI_CLK:
 		qcom_gate_clk_en(priv, GCC_USB30_PRIM_MASTER_CLK);
 		fallthrough;
@@ -147,11 +169,13 @@ static const struct qcom_power_map sc7280_gdscs[] = {
 static const phys_addr_t sc7280_rcg_addrs[] = {
 	0x10f020, // USB30_PRIM_MASTER_CLK_CMD_RCGR
 	0x10f038, // USB30_PRIM_MOCK_UTMI_CLK_CMD_RCGR
+	0x177024, // UFS_PHY_AXI_CLK
 };
 
 static const char * sc7280_rcg_names[] = {
 	"USB30_PRIM_MASTER_CLK",
 	"USB30_PRIM_MOCK_UTMI_CLK",
+	"UFS_PHY_AXI_CLK",
 };
 
 static struct msm_clk_data qcs404_gcc_data = {
