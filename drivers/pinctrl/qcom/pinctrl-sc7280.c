@@ -47,7 +47,7 @@ static const struct pinctrl_function msm_pinctrl_functions[] = {
 	}
 
 static const struct msm_special_pin_data sc7280_special_pins_data[] = {
-	[0] = UFS_RESET("ufs_reset", SOUTH + 0xbe000),
+	[0] = UFS_RESET("ufs_reset", 0xbe000),
 	[1] = SDC_PINGROUP("sdc1_rclk", 0xb3004, 0, 6),
 	[2] = SDC_PINGROUP("sdc1_clk", 0xb3000, 13, 6),
 	[3] = SDC_PINGROUP("sdc1_cmd", 0xb3000, 11, 3),
