@@ -65,7 +65,7 @@ static const char *milos_get_pin_name(struct udevice *dev,
 	return pin_name;
 }
 
-static unsigned int milos_get_function_mux(__maybe_unused unsigned int pin,
+static int milos_get_function_mux(__maybe_unused unsigned int pin,
 						unsigned int selector)
 {
 	return msm_pinctrl_functions[selector].val;
