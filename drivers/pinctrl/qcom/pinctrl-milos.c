@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /*
- * Pinctrl drivers for Qualcomm SM7635 (SM6650)
+ * Pinctrl drivers for Qualcomm Milos (SM6650 / SM7635)
  *
  * Copyright (c) 2025, Danila Tikhonov <danila@jiaxyga.com>
  */
@@ -47,13 +47,13 @@ static const struct msm_special_pin_data msm_special_pins_data[] = {
 	[3] = SDC_QDSD_PINGROUP("sdc2_data", 0xab000, 9, 0),
 };
 
-static const char *sm7635_get_function_name(struct udevice *dev,
+static const char *milos_get_function_name(struct udevice *dev,
 						unsigned int selector)
 {
 	return msm_pinctrl_functions[selector].name;
 }
 
-static const char *sm7635_get_pin_name(struct udevice *dev,
+static const char *milos_get_pin_name(struct udevice *dev,
 						unsigned int selector)
 {
 	if (selector >= 167 && selector <= 170)
@@ -65,31 +65,31 @@ static const char *sm7635_get_pin_name(struct udevice *dev,
 	return pin_name;
 }
 
-static unsigned int sm7635_get_function_mux(__maybe_unused unsigned int pin,
+static unsigned int milos_get_function_mux(__maybe_unused unsigned int pin,
 						unsigned int selector)
 {
 	return msm_pinctrl_functions[selector].val;
 }
 
-static struct msm_pinctrl_data sm7635_data = {
+static struct msm_pinctrl_data milos_data = {
 	.pin_data = {
 		.pin_count = 171,
 		.special_pins_start = 167,
 		.special_pins_data = msm_special_pins_data,
 	},
 	.functions_count = ARRAY_SIZE(msm_pinctrl_functions),
-	.get_function_name = sm7635_get_function_name,
-	.get_function_mux = sm7635_get_function_mux,
-	.get_pin_name = sm7635_get_pin_name,
+	.get_function_name = milos_get_function_name,
+	.get_function_mux = milos_get_function_mux,
+	.get_pin_name = milos_get_pin_name,
 };
 
 static const struct udevice_id msm_pinctrl_ids[] = {
-	{ .compatible = "qcom,sm7635-tlmm", .data = (ulong)&sm7635_data },
+	{ .compatible = "qcom,milos-tlmm", .data = (ulong)&milos_data },
 	{ /* Sentinel */ }
 };
 
-U_BOOT_DRIVER(pinctrl_sm7635) = {
-	.name		= "pinctrl_sm7635",
+U_BOOT_DRIVER(pinctrl_milos) = {
+	.name		= "pinctrl_milos",
 	.id		= UCLASS_NOP,
 	.of_match	= msm_pinctrl_ids,
 	.ops		= &msm_pinctrl_ops,
