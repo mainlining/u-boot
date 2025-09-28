@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /*
- * Clock drivers for Qualcomm SM7635 (SM6650)
+ * Clock drivers for Qualcomm Milos (SM6650 / SM7635)
  *
  * Copyright (c) 2025, Danila Tikhonov <danila@jiaxyga.com>
  */
@@ -12,7 +12,7 @@
 #include <asm/io.h>
 #include <linux/bug.h>
 #include <linux/bitops.h>
-#include <dt-bindings/clock/qcom,sm7635-gcc.h>
+#include <dt-bindings/clock/qcom,milos-gcc.h>
 
 #include "clock-qcom.h"
 
@@ -24,7 +24,7 @@ static const struct freq_tbl ftbl_gcc_usb30_prim_master_clk_src[] = {
 	{ }
 };
 
-static ulong sm7635_set_rate(struct clk *clk, ulong rate)
+static ulong milos_set_rate(struct clk *clk, ulong rate)
 {
 	struct msm_clk_priv *priv = dev_get_priv(clk->dev);
 	const struct freq_tbl *freq;
@@ -41,14 +41,14 @@ static ulong sm7635_set_rate(struct clk *clk, ulong rate)
 	}
 }
 
-static const struct gate_clk sm7635_clks[] = {
+static const struct gate_clk milos_clks[] = {
 	GATE_CLK(GCC_USB30_PRIM_MASTER_CLK,		0x39018, BIT(0)),
 	GATE_CLK(GCC_USB3_PRIM_PHY_AUX_CLK,		0x39060, BIT(0)),
 	GATE_CLK(GCC_USB3_PRIM_PHY_COM_AUX_CLK,		0x39064, BIT(0)),
 	GATE_CLK(GCC_AGGRE_USB3_PRIM_AXI_CLK,		0x39090, BIT(0)),
 };
 
-static int sm7635_enable(struct clk *clk)
+static int milos_enable(struct clk *clk)
 {
 	struct msm_clk_priv *priv = dev_get_priv(clk->dev);
 
@@ -58,7 +58,7 @@ static int sm7635_enable(struct clk *clk)
 		return 0;
 	}
 
-	debug("%s: clk %s\n", __func__, sm7635_clks[clk->id].name);
+	debug("%s: clk %s\n", __func__, milos_clks[clk->id].name);
 
 	switch (clk->id) {
 	case GCC_AGGRE_USB3_PRIM_AXI_CLK:
@@ -75,7 +75,7 @@ static int sm7635_enable(struct clk *clk)
 	return 0;
 }
 
-static const struct qcom_reset_map sm7635_gcc_resets[] = {
+static const struct qcom_reset_map milos_gcc_resets[] = {
 	[GCC_CAMERA_BCR] = { 0x26000 },
 	[GCC_DISPLAY_BCR] = { 0x27000 },
 	[GCC_GPU_BCR] = { 0x71000 },
@@ -106,7 +106,7 @@ static const struct qcom_reset_map sm7635_gcc_resets[] = {
 	[GCC_VIDEO_BCR] = { 0x32000 },
 };
 
-static const struct qcom_power_map sm7635_gdscs[] = {
+static const struct qcom_power_map milos_gdscs[] = {
 	[PCIE_0_GDSC] = { 0x6b004 },
 	[PCIE_0_PHY_GDSC] = { 0x6c000 },
 	[UFS_PHY_GDSC] = { 0x77004 },
@@ -115,30 +115,30 @@ static const struct qcom_power_map sm7635_gdscs[] = {
 	[USB3_PHY_GDSC] = { 0x5000c },
 };
 
-static struct msm_clk_data sm7635_gcc_data = {
-	.resets = sm7635_gcc_resets,
-	.num_resets = ARRAY_SIZE(sm7635_gcc_resets),
-	.clks = sm7635_clks,
-	.num_clks = ARRAY_SIZE(sm7635_clks),
-	.power_domains = sm7635_gdscs,
-	.num_power_domains = ARRAY_SIZE(sm7635_gdscs),
+static struct msm_clk_data milos_gcc_data = {
+	.resets = milos_gcc_resets,
+	.num_resets = ARRAY_SIZE(milos_gcc_resets),
+	.clks = milos_clks,
+	.num_clks = ARRAY_SIZE(milos_clks),
+	.power_domains = milos_gdscs,
+	.num_power_domains = ARRAY_SIZE(milos_gdscs),
 
-	.enable = sm7635_enable,
-	.set_rate = sm7635_set_rate,
+	.enable = milos_enable,
+	.set_rate = milos_set_rate,
 };
 
-static const struct udevice_id gcc_sm7635_of_match[] = {
+static const struct udevice_id gcc_milos_of_match[] = {
 	{
-		.compatible = "qcom,gcc-sm7635",
-		.data = (ulong)&sm7635_gcc_data,
+		.compatible = "qcom,gcc-milos",
+		.data = (ulong)&milos_gcc_data,
 	},
 	{}
 };
 
-U_BOOT_DRIVER(gcc_sm7635) = {
-	.name = "gcc_sm7635",
+U_BOOT_DRIVER(gcc_milos) = {
+	.name = "gcc_milos",
 	.id = UCLASS_NOP,
-	.of_match = gcc_sm7635_of_match,
+	.of_match = gcc_milos_of_match,
 	.bind = qcom_cc_bind,
 	.flags = DM_FLAG_PRE_RELOC | DM_FLAG_DEFAULT_PD_CTRL_OFF,
 };
