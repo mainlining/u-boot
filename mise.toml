@@ -1,0 +1,41 @@
+[vars]
+outdir = ".output"
+config = "qcom_defconfig qcom-phone.config tauchgang.config"
+makeprops = "O={{vars.outdir}} CROSS_COMPILE=aarch64-linux-gnu-"
+
+[tasks.clean]
+description = "Clean U-Boot"
+run = "make {{vars.makeprops}} -j$(nproc --all) mrproper"
+
+[tasks.config]
+description = "Make U-Boot config"
+run = "make {{vars.makeprops}} -j$(nproc --all) {{vars.config}}" 
+
+[tasks.build]
+description = "Make U-Boot"
+run = "make {{vars.makeprops}} -j$(nproc --all) DEVICE_TREE=qcom/{{env.DTS}}"
+
+[tasks.mkbootimg]
+description = "Make U-Boot bootimg"
+run = '''
+mkbootimg \
+	--kernel {{vars.outdir}}/u-boot-nodtb.bin \
+	--dtb {{vars.outdir}}/dts/upstream/src/arm64/qcom/{{env.DTS}}.dtb \
+	--base 0x0 \
+	--kernel_offset 0x8000 \
+	--ramdisk_offset 0x1000000 \
+	--tags_offset 0x100 \
+	--pagesize 4096 \
+	--header_version 2 \
+	-o {{vars.outdir}}/u-boot.img
+'''
+
+[tasks.ci]
+description = "Full U-Boot CI pipeline"
+run = [
+  { task = "clean" },
+  { task = "config" },
+  { task = "build" },
+  { task = "mkbootimg" },
+  "echo CI done"
+]
